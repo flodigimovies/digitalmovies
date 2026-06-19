@@ -26,9 +26,23 @@ export async function getUserOrders() {
     .eq('user_id', cbid)
 
   if (error) throw { message: error.message }
-  return data
-}
 
+  const { data: products, error: prodError } = await supabase
+    .from('products')
+    .select('id, download_url')
+
+  if (prodError) throw { message: prodError.message }
+
+  const ordersWithDownload = data.map(order => ({
+    ...order,
+    cart_list: order.cart_list.map(item => ({
+      ...item,
+      dlUrl: products.find(p => p.id === item.id)?.download_url || null
+    }))
+  }))
+
+  return ordersWithDownload
+}
 export async function createOrder(cartList, total, user) {
   const { cbid } = getSession()
 

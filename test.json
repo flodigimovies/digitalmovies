@@ -1,0 +1,9 @@
+{
+  "amount": 10,
+  "description": "Test",
+  "payment_method": "gcash",
+  "success_url": "https://my-vite-digitalmovies-react-js.vercel.app/order-summary",
+  "cancel_url": "https://my-vite-digitalmovies-react-js.vercel.app/cart",
+  "name": "Test",
+  "email": "test@test.com"
+}

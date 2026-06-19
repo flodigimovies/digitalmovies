@@ -15,37 +15,54 @@ serve(async (req) => {
 
     const secretKey = Deno.env.get("PAYMONGO_SECRET_KEY");
 
+    // Build allowed payment method types
+    const methodMap: Record<string, string[]> = {
+      gcash:   ["gcash"],
+      paymaya: ["paymaya"],
+      card:    ["card"],
+      qrph:    ["qrph"],
+    };
+    const payment_method_types = methodMap[payment_method] ?? ["gcash", "paymaya", "card"];
+
+    const body = {
+      data: {
+        attributes: {
+          billing: {
+            name: name ?? "Customer",
+            email: email ?? "",
+          },
+          send_email_receipt: false,
+          show_description: true,
+          show_line_items: true,
+          line_items: [
+            {
+              currency: "PHP",
+              amount: Math.round(amount * 100),
+              name: description,
+              quantity: 1,
+            },
+          ],
+          payment_method_types,
+          success_url,
+          cancel_url,
+        },
+      },
+    };
+
+    console.log("PayMongo checkout request:", JSON.stringify(body));
+
     const response = await fetch("https://api.paymongo.com/v1/checkout_sessions", {
       method: "POST",
       headers: {
         "Authorization": `Basic ${btoa(secretKey + ":")}`,
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({
-        data: {
-          attributes: {
-            billing: {
-              name: name,
-              email: email,
-            },
-            line_items: [
-              {
-                currency: "PHP",
-                amount: amount * 100,
-                name: description,
-                quantity: 1,
-              },
-            ],
-            payment_method_types: [payment_method, "qrph"],
-            success_url: success_url,
-            cancel_url: cancel_url,
-            description: description,
-          },
-        },
-      }),
+      body: JSON.stringify(body),
     });
 
     const data = await response.json();
+    console.log("PayMongo response:", JSON.stringify(data));
+
     return new Response(JSON.stringify(data), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });

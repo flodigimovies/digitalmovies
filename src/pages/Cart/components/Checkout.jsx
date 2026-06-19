@@ -35,29 +35,33 @@ export const Checkout = ({ setCheckout }) => {
       // 1. Create order in Supabase first
       const order = await createOrder(cartList, total, user);
 
-      // 2. Call Supabase Edge Function to create PayMongo link
+      // 2. Call Supabase Edge Function to create PayMongo Checkout Session
       const response = await fetch(`${SUPABASE_URL}/functions/v1/paymongo-payment`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-        amount: total,
-        description: `Digital Movies Order #${order.id}`,
-        payment_method: selectedMethod,
-        success_url: `${window.location.origin}/order-summary`,
-        cancel_url: `${window.location.origin}/cart`,
-        name: user.name,
-        email: user.email,
+          amount: total,
+          description: `Digital Movies Order #${order.id}`,
+          payment_method: selectedMethod,
+          success_url: `${window.location.origin}/order-summary`,
+          cancel_url: `${window.location.origin}/cart`,
+          name: user.name,
+          email: user.email,
         }),
       });
 
       const result = await response.json();
+      console.log("Full result:", JSON.stringify(result));
 
-      if (result?.data?.attributes?.checkout_url) {
+      // PayMongo Checkout Sessions return checkout_url inside data.attributes
+      const checkoutUrl = result?.data?.attributes?.checkout_url;
+
+      if (checkoutUrl) {
         clearCart();
-        // 3. Redirect to PayMongo checkout
-        window.location.href = result.data.attributes.checkout_url;
+        window.location.href = checkoutUrl;
       } else {
-        throw new Error("Failed to create payment link");
+        const errorMsg = result?.errors?.[0]?.detail || result?.error || "Failed to create checkout session";
+        throw new Error(errorMsg);
       }
     } catch (error) {
       toast.error(error.message, { closeButton: true, position: "bottom-center" });
@@ -142,4 +146,3 @@ export const Checkout = ({ setCheckout }) => {
     </section>
   );
 };
-

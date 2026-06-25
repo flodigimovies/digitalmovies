@@ -1,10 +1,8 @@
 import { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { useTitle } from "../../hooks/useTitle";
-
 import { ProductCard } from "../../components";
 import { FilterBar } from "./components/FilterBar";
-
 import { useFilter } from "../../context";
 import { getProductList } from "../../services";
 import { toast } from "react-toastify";
@@ -15,40 +13,52 @@ export const ProductsList = () => {
   const search = useLocation().search;
   const searchTerm = new URLSearchParams(search).get("q");
   useTitle("Explore Movies Collection");
- 
+
   useEffect(() => {
-    async function fetchProducts(){
-      try{
+    async function fetchProducts() {
+      try {
         const data = await getProductList(searchTerm);
-        initialProductList(data); 
-      } catch(error){
-        toast.error(error.message, {closeButton: true, position: "bottom-center" });
+        initialProductList(data);
+      } catch (error) {
+        toast.error(error.message, { closeButton: true, position: "bottom-center" });
       }
     }
     fetchProducts();
   }, [searchTerm]); //eslint-disable-line
 
   return (
-    <main>
-        <section className="my-5">
-          <div className="my-5 flex justify-between">
-            <span className="text-2xl font-semibold dark:text-slate-100 mb-5">All Movies ({products.length})</span>
-            <span>
-              <button onClick={() => setShow(!show)} id="dropdownMenuIconButton" data-dropdown-toggle="dropdownDots" className="inline-flex items-center p-2 text-sm font-medium text-center text-gray-900 bg-gray-100 rounded-lg hover:bg-gray-200 dark:text-white dark:bg-gray-600 dark:hover:bg-gray-700" type="button"> 
-                <svg className="w-6 h-6" aria-hidden="true" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z"></path></svg>
-              </button>
-            </span>            
-          </div>    
+    <main className="max-w-screen-xl mx-auto px-4 py-6">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-6">
+        <div>
+          <h1 className="text-xl font-bold text-gray-900 dark:text-white">
+            {searchTerm ? `Results for "${searchTerm}"` : "All Movies"}
+          </h1>
+          <p className="text-sm text-gray-500 dark:text-gray-400">{products.length} movies available</p>
+        </div>
+        <button
+          onClick={() => setShow(!show)}
+          className="flex items-center gap-2 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-white text-sm font-medium px-4 py-2 rounded-full transition-colors"
+        >
+          <i className="bi bi-sliders"></i> Filter
+        </button>
+      </div>
 
-          <div className="flex flex-wrap justify-center lg:flex-row">
-            { products.map((product) => (
-              <ProductCard key={product.id} product={product} />
-            )) }            
-          </div>  
-        </section>
+      {/* YouTube-like grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        {products.map((product) => (
+          <ProductCard key={product.id} product={product} />
+        ))}
+      </div>
 
-        { show && <FilterBar setShow={setShow} /> }
+      {products.length === 0 && (
+        <div className="text-center py-20 text-gray-400 dark:text-gray-500">
+          <i className="bi bi-film text-6xl mb-4 block"></i>
+          <p className="text-lg">No movies found</p>
+        </div>
+      )}
 
-    </main> 
-  )
-}
+      {show && <FilterBar setShow={setShow} />}
+    </main>
+  );
+};

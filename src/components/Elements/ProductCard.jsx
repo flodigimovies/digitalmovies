@@ -1,49 +1,119 @@
-import { useEffect } from "react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useCart } from "../../context";
 import { Rating } from "./Rating";
 
-export const ProductCard = ({product}) => {
-    const { cartList, addToCart, removeFromCart } = useCart();
-    const [inCart, setInCart] = useState(false);
-    const {id, name, overview, poster, price, rating, best_seller} = product;
+export const ProductCard = ({ product, compact = false }) => {
+  const { cartList, addToCart, removeFromCart } = useCart();
+  const [inCart, setInCart] = useState(false);
+  const { id, name, overview, poster, price, rating, best_seller } = product;
 
-    useEffect(() => {
-        const productInCart = cartList.find(item => item.id === product.id);
+  useEffect(() => {
+    const productInCart = cartList.find(item => item.id === product.id);
+    setInCart(!!productInCart);
+  }, [cartList, product.id]);
 
-        if(productInCart){
-            setInCart(true);
-        } else {
-            setInCart(false);
-        }
-
-    }, [cartList, product.id]);
-
-  return (
-    <div className="m-3 w-72 flex flex-col bg-white rounded-lg border border-gray-200 shadow-md dark:bg-gray-800 dark:border-gray-700">
-        <Link to={`/products/${id}`} className="relative" >
-            { best_seller && <span className="absolute top-4 left-2 px-2 bg-orange-500 bg-opacity-90 text-white rounded">Best Seller</span> }
-            <img className="rounded-t-lg w-full h-64 object-cover" src={poster} alt={name} />
+  // Compact card for Featured section in Hero
+  if (compact) {
+    return (
+      <div className="flex flex-col bg-white dark:bg-gray-900 rounded-lg overflow-hidden hover:bg-gray-50 dark:hover:bg-gray-800 transition-all duration-200 group cursor-pointer w-36">
+        <Link to={`/products/${id}`} className="relative block overflow-hidden rounded-lg">
+          {best_seller && (
+            <span className="absolute top-1 left-1 z-10 px-1.5 py-0.5 bg-orange-500 text-white text-xs font-semibold rounded">
+              🔥
+            </span>
+          )}
+          <img
+            className="w-full aspect-[2/3] object-cover rounded-lg group-hover:scale-105 transition-transform duration-300"
+            src={poster}
+            alt={name}
+          />
+          <span className="absolute bottom-1 right-1 bg-black bg-opacity-80 text-white text-xs font-bold px-1.5 py-0.5 rounded">
+            ₱{price.toLocaleString()}
+          </span>
         </Link>
-        <div className="p-5 flex flex-col flex-1">
-            <Link to={`/products/${id}`}>
-                <h5 className="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white line-clamp-1">{name}</h5>
-            </Link>
-            <p className="mb-3 font-normal text-gray-700 dark:text-gray-400 line-clamp-3 flex-1">{overview}</p>
-            
-            <div className="flex items-center my-2">
-                <Rating rating={rating} />
-            </div>
-
-            <p className="flex justify-between items-center mt-auto">
-                <span className="text-2xl dark:text-gray-200">
-                    <span>₱{price.toLocaleString()}</span>
-                </span>
-                { !inCart && <button onClick={() => addToCart(product)} className={`inline-flex items-center py-2 px-3 text-sm font-medium text-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 ${product.in_stock ? "" : "cursor-not-allowed"}`} disabled={ product.in_stock ? "" : "disabled" }>Add To Cart <i className="ml-1 bi bi-plus-lg"></i></button> }  
-                { inCart && <button onClick={() => removeFromCart(product)} className={`inline-flex items-center py-2 px-3 text-sm font-medium text-center text-white bg-red-600 rounded-lg hover:bg-red-800 ${product.in_stock ? "" : "cursor-not-allowed"}`} disabled={ product.in_stock ? "" : "disabled" }>Remove Item <i className="ml-1 bi bi-trash3"></i></button> } 
-            </p>
+        <div className="pt-2 px-1 pb-2">
+          <Link to={`/products/${id}`}>
+            <h3 className="text-xs font-semibold text-gray-900 dark:text-white line-clamp-2 leading-snug mb-1 group-hover:text-red-500 transition-colors">
+              {name}
+            </h3>
+          </Link>
+          {!inCart ? (
+            <button
+              onClick={() => addToCart(product)}
+              disabled={!product.in_stock}
+              className="w-full text-xs bg-red-600 hover:bg-red-700 disabled:bg-gray-400 text-white font-medium px-2 py-1 rounded-full transition-colors mt-1"
+            >
+              <i className="bi bi-cart-plus mr-1"></i>Add
+            </button>
+          ) : (
+            <button
+              onClick={() => removeFromCart(product)}
+              className="w-full text-xs bg-gray-700 hover:bg-gray-800 text-white font-medium px-2 py-1 rounded-full transition-colors mt-1"
+            >
+              <i className="bi bi-trash3 mr-1"></i>Remove
+            </button>
+          )}
         </div>
+      </div>
+    );
+  }
+
+  // Full YouTube-like card for Products page
+  return (
+    <div className="flex flex-col bg-white dark:bg-gray-900 rounded-xl overflow-hidden hover:bg-gray-50 dark:hover:bg-gray-800 transition-all duration-200 group cursor-pointer w-full">
+      <Link to={`/products/${id}`} className="relative block overflow-hidden rounded-xl">
+        {best_seller && (
+          <span className="absolute top-2 left-2 z-10 px-2 py-0.5 bg-orange-500 text-white text-xs font-semibold rounded">
+            Best Seller
+          </span>
+        )}
+        <img
+          className="w-full aspect-video object-cover rounded-xl group-hover:scale-105 transition-transform duration-300"
+          src={poster}
+          alt={name}
+        />
+        <span className="absolute bottom-2 right-2 bg-black bg-opacity-80 text-white text-xs font-bold px-2 py-1 rounded">
+          ₱{price.toLocaleString()}
+        </span>
+      </Link>
+
+      <div className="flex gap-3 pt-3 px-1 pb-2">
+        <div className="flex-shrink-0 w-9 h-9 rounded-full bg-red-600 flex items-center justify-center text-white font-bold text-sm">
+          DM
+        </div>
+        <div className="flex-1 min-w-0">
+          <Link to={`/products/${id}`}>
+            <h3 className="text-sm font-semibold text-gray-900 dark:text-white line-clamp-2 leading-snug mb-1 group-hover:text-red-500 transition-colors">
+              {name}
+            </h3>
+          </Link>
+          <p className="text-xs text-gray-500 dark:text-gray-400 line-clamp-1 mb-1">
+            Digital Movies PH
+          </p>
+          <div className="flex items-center gap-2">
+            <Rating rating={rating} />
+          </div>
+          <div className="mt-2">
+            {!inCart ? (
+              <button
+                onClick={() => addToCart(product)}
+                disabled={!product.in_stock}
+                className="text-xs bg-red-600 hover:bg-red-700 disabled:bg-gray-400 text-white font-medium px-3 py-1.5 rounded-full transition-colors"
+              >
+                <i className="bi bi-cart-plus mr-1"></i>Add to Cart
+              </button>
+            ) : (
+              <button
+                onClick={() => removeFromCart(product)}
+                className="text-xs bg-gray-700 hover:bg-gray-800 text-white font-medium px-3 py-1.5 rounded-full transition-colors"
+              >
+                <i className="bi bi-trash3 mr-1"></i>Remove
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
     </div>
-  )
-}
+  );
+};

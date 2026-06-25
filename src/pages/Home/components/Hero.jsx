@@ -6,11 +6,11 @@ export const Hero = () => {
     <section className="flex flex-col lg:flex-row dark:text-red-100 items-center">
         <div className="text my-5">
             <h1 className="text-5xl font-bold text-center lg:text-left dark:text-slate-100">
-  Wholesome movies for you and your family
+  Wholesome movies and Videos for you and your family
 </h1>
 
             <p className="text-2xl my-7 px-1 text-center lg:text-left dark:text-slate-100">
-             Movies that brings joy, laughter, inspiration, romance, action, suspense, horror, thriller, and even technology — for all ages.. Just Download, Play, and Watch!
+             Movies and videos that brings joy, laughter, inspiration, romance, action, suspense, horror, thriller, music and even technology — for all ages..NO ADVERTISEMENTS! AND ANNOYANCES! Just Download, Play, and Watch!
             </p>
 
              
@@ -18,7 +18,7 @@ export const Hero = () => {
             <Link to="/products" type="button" className="text-white bg-red-700 hover:bg-red-800
             focus:ring-4 focus:ring-red-300 font-medium rounded-sm text-base px-5 py-2.5 mr-2 mb-2
             dark:bg-red-600 dark:hover:bg-red-700 focus:outline-none dark:focus:ring-red-800">
-             Explore Movies
+             Explore
             </Link>
 </div>
 
@@ -30,7 +30,7 @@ export const Hero = () => {
 
 
         <div className="visual my-5 lg:max-w-xl">
-            <img className="rounded-lg max-h-full" src={Logo} alt="Digital Movies Logo" />
+            <img className="rounded-lg max-h-full" src={Logo} alt="Digiflix-Logo" />
         </div>
 
     </section>

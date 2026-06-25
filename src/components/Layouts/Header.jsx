@@ -34,7 +34,7 @@ export const Header = () => {
               style={{ fontFamily: "'Orbitron', sans-serif" }}
             >
               <span className="hidden xs:inline">Digital</span>
-              <span className="sm:inline">Digitalflix</span>
+              <span className="sm:inline">DigiHubph</span>
             </span>
           </Link>
 

@@ -32,10 +32,8 @@ export const Checkout = ({ setCheckout }) => {
     }
     setLoading(true);
     try {
-      // 1. Create order in Supabase first
       const order = await createOrder(cartList, total, user);
 
-      // 2. Call Supabase Edge Function to create PayMongo Checkout Session
       const response = await fetch(`${SUPABASE_URL}/functions/v1/paymongo-payment`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -51,9 +49,6 @@ export const Checkout = ({ setCheckout }) => {
       });
 
       const result = await response.json();
-      console.log("Full result:", JSON.stringify(result));
-
-      // PayMongo Checkout Sessions return checkout_url inside data.attributes
       const checkoutUrl = result?.data?.attributes?.checkout_url;
 
       if (checkoutUrl) {
@@ -80,12 +75,16 @@ export const Checkout = ({ setCheckout }) => {
 
   return (
     <section>
-      <div className="fixed top-0 left-0 w-full h-full bg-black bg-opacity-50"></div>
+      <div className="fixed top-0 left-0 w-full h-full bg-black bg-opacity-70"></div>
       <div className="mt-5 overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 w-full md:inset-0 h-modal md:h-full justify-center items-center flex" aria-modal="true" role="dialog">
         <div className="relative p-4 w-full max-w-md h-full md:h-auto overflow-y-auto">
-          <div className="relative bg-white rounded-lg shadow dark:bg-gray-700">
-            <button onClick={() => setCheckout(false)} type="button" className="absolute top-3 right-2.5 text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center dark:hover:bg-gray-800 dark:hover:text-white">
-              <svg aria-hidden="true" className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+          <div className="relative bg-white dark:bg-nf-card rounded-lg shadow border dark:border-nf-border">
+            <button
+              onClick={() => setCheckout(false)}
+              type="button"
+              className="absolute top-3 right-2.5 text-gray-400 bg-transparent hover:bg-gray-200 dark:hover:bg-nf-hover hover:text-gray-900 dark:hover:text-white rounded-lg text-sm p-1.5 ml-auto inline-flex items-center transition-colors"
+            >
+              <svg aria-hidden="true" className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd"></path>
               </svg>
               <span className="sr-only">Close modal</span>
@@ -96,7 +95,7 @@ export const Checkout = ({ setCheckout }) => {
                 <i className="bi bi-bag-check mr-2"></i>CHECKOUT
               </h3>
 
-              <div className="mb-4 text-sm text-gray-500 dark:text-gray-300">
+              <div className="mb-4 text-sm text-gray-500 dark:text-nf-muted">
                 <p>Name: <span className="font-medium text-gray-900 dark:text-white">{user.name || "..."}</span></p>
                 <p>Email: <span className="font-medium text-gray-900 dark:text-white">{user.email || "..."}</span></p>
               </div>
@@ -105,7 +104,7 @@ export const Checkout = ({ setCheckout }) => {
                 ₱{total.toLocaleString()}
               </p>
 
-              <p className="mb-3 text-sm font-medium text-gray-900 dark:text-gray-300">Select Payment Method:</p>
+              <p className="mb-3 text-sm font-medium text-gray-900 dark:text-nf-muted">Select Payment Method:</p>
 
               <div className="space-y-3 mb-6">
                 {paymentMethods.map((method) => (
@@ -114,8 +113,8 @@ export const Checkout = ({ setCheckout }) => {
                     onClick={() => setSelectedMethod(method.id)}
                     className={`w-full flex items-center gap-3 p-3 rounded-lg border-2 transition-all ${
                       selectedMethod === method.id
-                        ? "border-blue-500 bg-blue-50 dark:bg-blue-900"
-                        : "border-gray-200 dark:border-gray-600 hover:border-blue-300"
+                        ? "border-red-600 bg-red-950 dark:bg-red-950"
+                        : "border-gray-200 dark:border-nf-border hover:border-red-500 dark:hover:bg-nf-hover"
                     }`}
                   >
                     <span className={`${method.color} text-white rounded-full w-8 h-8 flex items-center justify-center`}>
@@ -123,7 +122,7 @@ export const Checkout = ({ setCheckout }) => {
                     </span>
                     <span className="font-medium text-gray-900 dark:text-white">{method.label}</span>
                     {selectedMethod === method.id && (
-                      <i className="bi bi-check-circle-fill text-blue-500 ml-auto"></i>
+                      <i className="bi bi-check-circle-fill text-red-500 ml-auto"></i>
                     )}
                   </button>
                 ))}
@@ -132,7 +131,7 @@ export const Checkout = ({ setCheckout }) => {
               <button
                 onClick={handlePayment}
                 disabled={loading || !selectedMethod}
-                className="w-full text-white bg-blue-700 hover:bg-blue-800 disabled:bg-gray-400 font-medium rounded-lg text-sm px-5 py-2.5 text-center"
+                className="w-full text-white bg-red-600 hover:bg-red-700 disabled:bg-gray-600 font-medium rounded-lg text-sm px-5 py-2.5 text-center transition-colors"
               >
                 {loading ? (
                   <span><i className="bi bi-arrow-repeat mr-2 animate-spin"></i>Processing...</span>

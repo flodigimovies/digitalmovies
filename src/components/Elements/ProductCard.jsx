@@ -16,7 +16,7 @@ export const ProductCard = ({ product, compact = false }) => {
   // Compact card for Featured section in Hero
   if (compact) {
     return (
-      <div className="flex flex-col bg-white dark:bg-nf-card rounded-lg overflow-hidden hover:bg-gray-50 dark:hover:bg-nf-hover transition-all duration-200 group cursor-pointer w-36">
+      <div className="flex flex-col bg-white dark:bg-gray-900 rounded-lg overflow-hidden hover:bg-gray-50 dark:hover:bg-gray-800 transition-all duration-200 group cursor-pointer w-36">
         <Link to={`/products/${id}`} className="relative block overflow-hidden rounded-lg">
           {best_seller && (
             <span className="absolute top-1 left-1 z-10 px-1.5 py-0.5 bg-orange-500 text-white text-xs font-semibold rounded">
@@ -49,7 +49,7 @@ export const ProductCard = ({ product, compact = false }) => {
           ) : (
             <button
               onClick={() => removeFromCart(product)}
-              className="w-full text-xs bg-nf-hover hover:bg-nf-border text-white font-medium px-2 py-1 rounded-full transition-colors mt-1"
+              className="w-full text-xs bg-gray-700 hover:bg-gray-800 text-white font-medium px-2 py-1 rounded-full transition-colors mt-1"
             >
               <i className="bi bi-trash3 mr-1"></i>Remove
             </button>
@@ -59,9 +59,9 @@ export const ProductCard = ({ product, compact = false }) => {
     );
   }
 
-  // Full card for Products page
+  // Full YouTube-like card for Products page
   return (
-    <div className="flex flex-col bg-white dark:bg-nf-card rounded-xl overflow-hidden hover:bg-gray-50 dark:hover:bg-nf-hover transition-all duration-200 group cursor-pointer w-full border border-transparent dark:hover:border-nf-border">
+    <div className="flex flex-col bg-white dark:bg-gray-900 rounded-xl overflow-hidden hover:bg-gray-50 dark:hover:bg-gray-800 transition-all duration-200 group cursor-pointer w-full">
       <Link to={`/products/${id}`} className="relative block overflow-hidden rounded-xl">
         {best_seller && (
           <span className="absolute top-2 left-2 z-10 px-2 py-0.5 bg-orange-500 text-white text-xs font-semibold rounded">
@@ -88,7 +88,7 @@ export const ProductCard = ({ product, compact = false }) => {
               {name}
             </h3>
           </Link>
-          <p className="text-xs text-gray-500 dark:text-nf-muted line-clamp-1 mb-1">
+          <p className="text-xs text-gray-500 dark:text-gray-400 line-clamp-1 mb-1">
             Digital Movies PH
           </p>
           <div className="flex items-center gap-2">
@@ -106,7 +106,7 @@ export const ProductCard = ({ product, compact = false }) => {
             ) : (
               <button
                 onClick={() => removeFromCart(product)}
-                className="text-xs bg-nf-hover hover:bg-nf-border text-white font-medium px-3 py-1.5 rounded-full transition-colors"
+                className="text-xs bg-gray-700 hover:bg-gray-800 text-white font-medium px-3 py-1.5 rounded-full transition-colors"
               >
                 <i className="bi bi-trash3 mr-1"></i>Remove
               </button>

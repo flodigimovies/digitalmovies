@@ -7,13 +7,18 @@ function getSession() {
 }
 
 export async function getUser() {
+  // FIX: use supabase.auth.getUser() directly — no sessionStorage token needed
+  // This works for email AND phone accounts, and survives token refreshes
   const { data, error } = await supabase.auth.getUser()
   if (error) throw { message: error.message }
+  if (!data.user) throw { message: "You are not logged in. Please log in to continue." }
 
+  const user = data.user
   return {
-    id: data.user.id,
-    email: data.user.email,
-    name: data.user.user_metadata?.name || data.user.email,
+    id: user.id,
+    email: user.email || null,
+    phone: user.phone || null,  // FIX: include phone for phone-only accounts
+    name: user.user_metadata?.name || user.email || user.phone || 'User',
   }
 }
 
@@ -43,6 +48,7 @@ export async function getUserOrders() {
 
   return ordersWithDownload
 }
+
 export async function createOrder(cartList, total, user) {
   const { cbid } = getSession()
 
@@ -54,16 +60,17 @@ export async function createOrder(cartList, total, user) {
       quantity: cartList.length,
       user_id: cbid,
       user_name: user.name,
-      user_email: user.email,
+      user_email: user.email || user.phone || '',
     }])
     .select()
 
   if (error) throw { message: error.message }
   return data[0]
 }
+
 export async function getLatestOrder() {
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) throw { message: "Not logged in" }
+  const { data: { user }, error: userError } = await supabase.auth.getUser()
+  if (userError || !user) throw { message: "Not logged in" }
 
   const { data, error } = await supabase
     .from('orders')

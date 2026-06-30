@@ -25,23 +25,17 @@ function getDownloaded() {
   catch { return {} }
 }
 
-// Key = "orderId_productId" — same product on a NEW order gets a fresh button
-function makeKey(orderId, productId) {
-  return `${orderId}_${productId}`
-}
-
+// FIX: key by "orderId_productId" so each order is tracked independently
 function markDownloaded(orderId, productId) {
   const current = getDownloaded()
-  localStorage.setItem(STORAGE_KEY, JSON.stringify({ ...current, [makeKey(orderId, productId)]: true }))
-}
-
-function wasDownloaded(orderId, productId) {
-  return !!getDownloaded()[makeKey(orderId, productId)]
+  const key = `${orderId}_${productId}`
+  localStorage.setItem(STORAGE_KEY, JSON.stringify({ ...current, [key]: true }))
 }
 
 export const OrderSuccess = ({ data }) => {
   const [order, setOrder] = useState(data || null)
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(!data) // skip loading spinner if data already provided
+  // FIX: start empty — populate AFTER order loads using order-scoped keys
   const [downloadStatus, setDownloadStatus] = useState({})
   const hasFetched = useRef(false)
 
@@ -49,19 +43,12 @@ export const OrderSuccess = ({ data }) => {
     if (hasFetched.current) return
     hasFetched.current = true
 
+    if (data) return // already have the order, no need to fetch
+
     async function fetchOrder() {
       try {
-        const latestOrder = data || await getLatestOrder()
+        const latestOrder = await getLatestOrder()
         setOrder(latestOrder)
-
-        // Pre-mark products already downloaded for THIS specific order
-        const preloaded = {}
-        latestOrder.cart_list.forEach(product => {
-          if (wasDownloaded(latestOrder.id, product.id)) {
-            preloaded[product.id] = 'done'
-          }
-        })
-        setDownloadStatus(preloaded)
       } catch (error) {
         console.error("Failed to fetch order:", error)
       } finally {
@@ -72,18 +59,32 @@ export const OrderSuccess = ({ data }) => {
     fetchOrder()
   }, [])
 
-  function handleDownload(url, name, productId) {
-    setDownloadStatus(prev => ({ ...prev, [productId]: 'downloading' }))
+  // FIX: once order is available, restore only THIS order's download history
+  useEffect(() => {
+    if (!order) return
+    const downloaded = getDownloaded()
+    const initial = {}
+    order.cart_list.forEach((product) => {
+      const key = `${order.id}_${product.id}`
+      if (downloaded[key]) {
+        initial[product.id] = "done"
+      }
+    })
+    setDownloadStatus(initial)
+  }, [order])
 
-    const markDone = (productId) => {
-      markDownloaded(order.id, productId)
-      setDownloadStatus(prev => ({ ...prev, [productId]: 'done' }))
+  function handleDownload(url, name, id) {
+    setDownloadStatus(prev => ({ ...prev, [id]: "downloading" }))
+
+    const markDone = (id) => {
+      markDownloaded(order.id, id) // FIX: pass order.id for scoped key
+      setDownloadStatus(prev => ({ ...prev, [id]: "done" }))
     }
 
     if (isGoogleDrive(url)) {
       const directUrl = getGDriveDirectUrl(url)
       window.open(directUrl, "_blank", "noopener,noreferrer")
-      markDone(productId)
+      markDone(id)
       return
     }
 
@@ -102,11 +103,11 @@ export const OrderSuccess = ({ data }) => {
         a.click()
         document.body.removeChild(a)
         setTimeout(() => window.URL.revokeObjectURL(blobUrl), 5000)
-        markDone(productId)
+        markDone(id)
       })
       .catch(() => {
         window.open(url, "_blank")
-        markDone(productId)
+        markDone(id)
       })
   }
 
@@ -118,6 +119,12 @@ export const OrderSuccess = ({ data }) => {
         {order && <p className="text-base mt-2">Order ID: {order.id}</p>}
         <p className="my-2 text-green-500 font-semibold text-lg">Payment Successful! ✅</p>
       </div>
+
+      {loading && (
+        <p className="text-base text-gray-400 animate-pulse my-5">
+          <i className="bi bi-hourglass-split mr-2"></i>Preparing your downloads...
+        </p>
+      )}
 
       {!loading && order && (
         <div className="my-6 px-4">
@@ -138,7 +145,7 @@ export const OrderSuccess = ({ data }) => {
                   )}
 
                   {/* Downloading */}
-                  {downloadStatus[product.id] === 'downloading' && (
+                  {downloadStatus[product.id] === "downloading" && (
                     <div className="flex items-center justify-center gap-2 text-blue-500 text-base py-3">
                       <i className="bi bi-arrow-repeat animate-spin"></i>
                       Downloading {product.name}...
@@ -146,7 +153,7 @@ export const OrderSuccess = ({ data }) => {
                   )}
 
                   {/* Done */}
-                  {downloadStatus[product.id] === 'done' && (
+                  {downloadStatus[product.id] === "done" && (
                     <div className="flex items-center justify-center gap-2 text-green-500 text-base py-3">
                       <i className="bi bi-check-circle-fill"></i>
                       {product.name} downloaded successfully! ✅
@@ -161,6 +168,11 @@ export const OrderSuccess = ({ data }) => {
               )
             )}
           </div>
+
+          <p className="text-sm text-gray-400 dark:text-gray-500 mt-6">
+            You can also download anytime from your{" "}
+            <Link to="/dashboard" className="text-blue-500 underline">Dashboard</Link>.
+          </p>
         </div>
       )}
 

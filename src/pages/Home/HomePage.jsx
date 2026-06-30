@@ -1,6 +1,8 @@
 import { useTitle } from "../../hooks/useTitle";
 import { Hero } from "./components/Hero";
 import { FeaturedProducts } from "./components/FeaturedProducts";
+import { FeaturedVideos } from "./components/FeaturedVideos";
+import { FeaturedMusic } from "./components/FeaturedMusic";
 import { Testimonials } from "./components/Testimonials";
 import { Faq } from "./components/Faq";
 
@@ -11,6 +13,8 @@ export const HomePage = () => {
     <main>
         <Hero />
         <FeaturedProducts />
+        <FeaturedVideos />
+        <FeaturedMusic />
         <Testimonials />
         <Faq />
     </main>

@@ -4,22 +4,28 @@ import { useTitle } from "../../hooks/useTitle";
 import { getUserOrders } from "../../services";
 import { DashboardCard } from "./components/DashboardCard";
 import { DashboardEmpty } from "./components/DashboardEmpty";
+import { DashboardSkeleton } from "../../components/Elements/Skeleton";
 
 export const DashboardPage = () => {
   const [orders, setOrders] = useState([]);
+  const [loading, setLoading] = useState(true);
   useTitle("Dashboard");
 
   useEffect(() => {
-    async function fetchOrders(){
-      try{
+    async function fetchOrders() {
+      try {
         const data = await getUserOrders();
         setOrders(data);
-      } catch(error){
+      } catch (error) {
         toast.error(error.message, { closeButton: true, position: "bottom-center" });
-      }      
+      } finally {
+        setLoading(false);
+      }
     }
     fetchOrders();
   }, []);
+
+  if (loading) return <DashboardSkeleton />;
 
   return (
     <main>
@@ -28,15 +34,14 @@ export const DashboardPage = () => {
       </section>
 
       <section>
-       { orders.length > 0 && orders.map((order) => (
+        {orders.length > 0 && orders.map((order) => (
           <DashboardCard key={order.id} order={order} />
-        )) }
+        ))}
       </section>
 
       <section>
-        { !orders.length && <DashboardEmpty /> }
+        {!orders.length && <DashboardEmpty />}
       </section>
-
     </main>
-  )
-}
+  );
+};

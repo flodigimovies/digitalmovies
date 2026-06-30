@@ -25,10 +25,24 @@ export async function getProduct(id) {
 
 export async function getFeaturedList() {
   const { data, error } = await supabase
-    .from('products')
-    .select('*')
-    .eq('best_seller', true)
+    .from('products').select('*')
+    .eq('best_seller', true).eq('type', 'movie').limit(4)
+  if (error) throw { message: error.message }
+  return data
+}
 
+export async function getFeaturedVideoList() {
+  const { data, error } = await supabase
+    .from('products').select('*')
+    .eq('type', 'video').eq('best_seller', true).limit(4)
+  if (error) throw { message: error.message }
+  return data
+}
+
+export async function getFeaturedMusicList() {
+  const { data, error } = await supabase
+    .from('products').select('*')
+    .eq('type', 'music').eq('best_seller', true).limit(4)
   if (error) throw { message: error.message }
   return data
 }
